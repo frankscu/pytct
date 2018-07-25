@@ -23,10 +23,9 @@ if platform.system()  == "Windows":
     else:
         libdir = os.path.join(ximc_dir,"win32")
         #print(platform.architecture())
-        
 
     #print(libdir)
-os.environ["Path"] = libdir + ";" + os.environ["Path"]  # add dll
+    os.environ["Path"] = libdir + ";" + os.environ["Path"]  # add dll
 
 if sys.version_info >= (3,0):
 
@@ -52,7 +51,7 @@ sbuf = create_string_buffer(64)
 lib.ximc_version(sbuf)
 print("Library version: " + sbuf.raw.decode())
 
-DEBUG = False
+DEBUG = True
 def log(s):
     if DEBUG:
         print(s)
@@ -113,10 +112,10 @@ class Motor():
         log(distance)
         dis = ctypes.c_int()
         dis.value = int(distance)
-        move_settings = move_settings_t()
-        result = self.lib.get_move_settings(self.device_id,move_settings)
-        if result == 0:
-            print("move settings:",move_settings.Speed,move_settings.uSpeed,move_settings.Accel,move_settings.Decel)
+        #move_settings = move_settings_t()
+        #result = self.lib.get_move_settings(self.device_id,move_settings)
+        #if result == 0 and platform.system() != "Linux":
+        #    print("move settings:",move_settings.Speed,move_settings.uSpeed,move_settings.Accel,move_settings.Decel)
         result = self.lib.command_movr(self.device_id, dis, 0)
         log("Result: " + repr(result))
 
@@ -127,7 +126,7 @@ class Motor():
         result = self.lib.command_movr(self.device_id, shift, 0)
         log("Result: " + repr(result))
 
-    def moveforward(self):       
+    def moveforward(self):
         log("\nMoving forward")
         result = self.lib.command_right(self.device_id)
         log("Result: " + repr(result))
@@ -192,7 +191,7 @@ class Motor():
         device_id = ctypes.c_int()
         print("\nOpen device " + repr(open_name))
         device_id = self.lib.open_device(open_name)
-        
+
         print("\ndevice id:" + repr(device_id))
         return device_id
 

@@ -3,7 +3,7 @@
 #reference:
 #Luis Ardila 	leardilap@unal.edu.co 	22/03/15
 
-#Liejian Chen   
+#Liejian Chen
 
 import sys,time
 import numpy
@@ -13,8 +13,11 @@ tctEnable = True
 if tctEnable:
     import pymotor
     import thread
-    import MDO3034Control
     import VitualDevice as vitual_dev
+
+scopeEnable = False
+if scopeEnable:
+    import MDO3034Control
 
 testpass = False
 
@@ -36,8 +39,9 @@ class MainWidget(QtWidgets.QWidget):
         self.timer.start(500)
         self.SetMotor()
         #self.SetSpeed()
-        self.ui.Interface.addItems(MDO3034Control.ReadInterface())
-            
+        if(scopeEnable):
+            self.ui.Interface.addItems(MDO3034Control.ReadInterface())
+
 
         #Move
         self.ui.MoveButton.clicked.connect(lambda:self.ClickMove(int(self.ui.SetPosX.text()), int(self.ui.SetPosY.text()), int(self.ui.SetPosZ.text())))
@@ -75,14 +79,15 @@ class MainWidget(QtWidgets.QWidget):
         #set folder
         self.ui.FolderSet.clicked.connect(self.SetFolder)
 
-        #capture data
-        self.ui.CaptureBut.clicked.connect(self.SaveData)
+        if(scopeEnable):
+            #capture data
+            self.ui.CaptureBut.clicked.connect(self.SaveData)
 
-        #capture pause
-        self.ui.CapturePause.clicked.connect(self.CapturePause)
+            #capture pause
+            self.ui.CapturePause.clicked.connect(self.CapturePause)
 
-        #Capture ready
-        self.ui.ReadyBut.clicked.connect(self.Ready)
+            #Capture ready
+            self.ui.ReadyBut.clicked.connect(self.Ready)
 
          # Var
         self.currentPosX = 0
@@ -95,7 +100,7 @@ class MainWidget(QtWidgets.QWidget):
         self.ui.setWindowTitle(self.Title)
         self.timer.timeout.connect(self.UpdateDesiredPos)
 
-       
+
         self.ui.show()
 
     def ClickMove(self,px,py,pz):
@@ -170,7 +175,7 @@ class MainWidget(QtWidgets.QWidget):
         self.new_thread.laser_stage.flag = 0
 
 
-    
+
     def EmumDevice(self):
         pymotor.enum_device()
         print('\nemum complete!\n')
@@ -191,10 +196,10 @@ class MainWidget(QtWidgets.QWidget):
         else:
             for self.dev_ind in range(0,self.dev_count):
                 self.device[self.dev_ind] =pymotor.Motor(self.device_name[self.dev_ind])
-        
-            
-        
-    
+
+
+
+
     def CurrentPosition(self):
         if tctEnable:
             self.currentPosX = self.setdevice[0].get_status_position()

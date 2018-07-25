@@ -14,7 +14,7 @@ class Stage():
         self.Xaxis.set_speed(step[0],speed[0])
         self.Yaxis.set_speed(step[1],speed[1])
         self.Zaxis.set_speed(step[2],speed[2])
-        
+
 
     def Home(self,motor):
             if tctEnable:
@@ -37,8 +37,8 @@ class Stage():
             self.Zaxis.move(pos_Z)
 
     def MoveRE(self,motor,movement):
-        UpperLimit = 1000     
-        LowerLimit = -1000    
+        UpperLimit = 25000
+        LowerLimit = -25000
         currentPos = motor.get_status_position()
         if currentPos + movement > UpperLimit:
             movement = UpperLimit - currentPos
@@ -49,9 +49,9 @@ class Stage():
             motor.forward(movement)
         time.sleep(0.1)
 
-    
+
     def Scan(self,pos_o,dp,Np):
-        self.x0 = pos_o[0] 
+        self.x0 = pos_o[0]
         self.y0 = pos_o[1]
         self.z0 = pos_o[2]
         self.dx = dp[0]
@@ -60,12 +60,12 @@ class Stage():
         self.Nx = Np[0]
         self.Ny = Np[1]
         self.Nz = Np[2]
-        
+
         if self.flag == 1:
             self.MoveAB(self.x0,self.y0,self.z0)
             #delay 1 second for motor moving to (x0,y0.z0)
             time.sleep(2)
-        
+
             # # scan step by step
             # self.flag1 = self.flag2 = -1
             # for self.i in range(0, self.Nz):
@@ -80,8 +80,8 @@ class Stage():
             #             print(self.ui.CurrentPosX_2.value(),self.ui.CurrentPosY_2.value(),self.ui.CurrentPosZ_2.value())
             #             self.timer.timeout.connect(self.UpdateDesiredPos)
             #             self.timer.start(100)
-            #             #self.UpdateDesiredPos() 
-                        
+            #             #self.UpdateDesiredPos()
+
 
             for self.PZ in range(self.z0, self.z0 + ((self.Nz + 1) * self.dz) , self.dz):
                 if self.flag == 0:
