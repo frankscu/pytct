@@ -97,9 +97,9 @@ class Stage():
                             break
                         self.MoveAB(self.PX, self.PY, self.PZ)
                         print(self.Xaxis.get_status_position(),self.Yaxis.get_status_position(),self.Zaxis.get_status_position())
-                        pos_file.write("{0}\t{1}\t{3}".format(self.Xaxis.get_status_position(),
-                                                              self.Yaxis.get_status_position(),
-                                                              self.Zaxis.get_status_position()))
+                        pos_file.write("{x}\t{y}\t{z}".format(x=self.Xaxis.get_status_position(),
+                                                              y=self.Yaxis.get_status_position(),
+                                                              z=self.Zaxis.get_status_position()))
                         os.chdir("/home/chenlj/Documents/Code/kc705/bin")
                         os.system("SystemTest -c sample_sim.json")
                         time.sleep(2)
