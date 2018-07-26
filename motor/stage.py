@@ -1,5 +1,6 @@
 import time
 import pymotor
+import os
 
 tctEnable = True
 
@@ -60,6 +61,7 @@ class Stage():
         self.Nx = Np[0]
         self.Ny = Np[1]
         self.Nz = Np[2]
+        pos_file = open("file"+str(time.strftime("%Y%m%d%H%M%S", time.gmtime()))+".txt", "w")
 
         if self.flag == 1:
             self.MoveAB(self.x0,self.y0,self.z0)
@@ -95,6 +97,14 @@ class Stage():
                             break
                         self.MoveAB(self.PX, self.PY, self.PZ)
                         print(self.Xaxis.get_status_position(),self.Yaxis.get_status_position(),self.Zaxis.get_status_position())
+                        pos_file.write("{0}\t{1}\t{3}".format(self.Xaxis.get_status_position(),
+                                                              self.Yaxis.get_status_position(),
+                                                              self.Zaxis.get_status_position()))
+                        os.chdir("/home/chenlj/Documents/Code/kc705/bin")
+                        os.system("SystemTest -c sample_sim.json")
+                        time.sleep(2)
                         #self.timer.timeout.connect(self.UpdateDesiredPos)
                         #self.timer.start(100)
                         #time.sleep(0.1)
+
+            pos_file.close()
