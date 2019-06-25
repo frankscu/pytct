@@ -9,25 +9,25 @@ import platform
 import tempfile
 
 cur_dir = os.path.abspath(os.path.dirname(__file__))
-ximc_dir = os.path.join(cur_dir, "..", "ximc")
-ximc_package_dir = os.path.join(ximc_dir, "crossplatform", "wrappers", "python")
+ximc_dir = os.path.join(cur_dir, 'libximc')
+ximc_package_dir = os.path.join(ximc_dir)
 sys.path.append(ximc_package_dir)  # add ximc.py wrapper to python path
 
 print(ximc_package_dir)
 
-if platform.system()  == "Windows":
+if platform.system() == "Windows":
     print("windows#################")
-    if platform.architecture() == ('64bit', 'WindowsPE') :
+    if platform.architecture() == ('64bit', 'WindowsPE'):
         libdir = os.path.join(ximc_dir, "win64")
-        #print(platform.architecture())
+        # print(platform.architecture())
     else:
-        libdir = os.path.join(ximc_dir,"win32")
-        #print(platform.architecture())
+        libdir = os.path.join(ximc_dir, "win32")
+        # print(platform.architecture())
 
-    #print(libdir)
+    # print(libdir)
     os.environ["Path"] = libdir + ";" + os.environ["Path"]  # add dll
 
-if sys.version_info >= (3,0):
+if sys.version_info >= (3, 0):
 
     try:
         from pyximc import *
@@ -52,9 +52,12 @@ lib.ximc_version(sbuf)
 print("Library version: " + sbuf.raw.decode())
 
 DEBUG = True
+
+
 def log(s):
     if DEBUG:
         print(s)
+
 
 def enum_device():
     devenum = lib.enumerate_devices(EnumerateFlags.ENUMERATE_PROBE, None)
@@ -65,27 +68,27 @@ def enum_device():
     print("Device count: " + repr(dev_count))
 
     controller_name = controller_name_t()
-    enum_name = ['','','']
+    enum_name = ['', '', '']
     for dev_ind in range(0, dev_count):
         enum_name[dev_ind] = lib.get_device_name(devenum, dev_ind)
         result = lib.get_enumerate_device_controller_name(devenum, dev_ind,
-                                                                   byref(controller_name))
+                                                          byref(controller_name))
         if result == Result.Ok:
-            print("Enumerated device #{} name (port name): ".format(dev_ind) \
-                    + repr(enum_name[dev_ind]) \
-                    + ". Friendly name: " \
-                    + repr(controller_name.ControllerName) \
+            print("Enumerated device #{} name (port name): ".format(dev_ind)
+                  + repr(enum_name[dev_ind])
+                  + ". Friendly name: "
+                    + repr(controller_name.ControllerName)
                     + ".")
 
     return enum_name, dev_count
 
+
 class Motor():
-    def __init__(self, device_name = None):
+    def __init__(self, device_name=None):
         self.lib = lib
         self.device_id = self.open_device(device_name)
 
-
-    def set_speed(self,step,speed):
+    def set_speed(self, step, speed):
         log("\nset speed\n")
         speed_settings = move_settings_t()
         speed_settings.Speed = speed
@@ -94,13 +97,18 @@ class Motor():
         speed_settings.Decel = 1
         speed_settings.AntiplaySpeed = 1
         speed_settings.uAntiplaySpeed = 1
-        result = self.lib.set_move_settings(self.device_id,speed_settings)
+        result = self.lib.set_move_settings(self.device_id, speed_settings)
         print("move settings Result:" + repr(result))
         move_settings = move_settings_t()
-        result = self.lib.get_move_settings(self.device_id,move_settings)
+        result = self.lib.get_move_settings(self.device_id, move_settings)
         if result == 0:
-            print("move settings:",move_settings.Speed,move_settings.uSpeed,move_settings.Accel,move_settings.Decel)
+            print("move settings:", move_settings.Speed,
+                  move_settings.uSpeed, move_settings.Accel, move_settings.Decel)
 
+    def reset(self):
+        log("\nReset current position")
+        result = self.lib.command_zero(self.device_id)
+        log("Result: " + repr(result))
 
     def home(self):
         log("\nMoving home")
@@ -114,7 +122,7 @@ class Motor():
         dis.value = int(distance)
         #move_settings = move_settings_t()
         #result = self.lib.get_move_settings(self.device_id,move_settings)
-        #if result == 0 and platform.system() != "Linux":
+        # if result == 0 and platform.system() != "Linux":
         #    print("move settings:",move_settings.Speed,move_settings.uSpeed,move_settings.Accel,move_settings.Decel)
         result = self.lib.command_movr(self.device_id, dis, 0)
         log("Result: " + repr(result))
@@ -122,7 +130,7 @@ class Motor():
     def backward(self, distance):    # move backward Deltaposition
         log("\nShifting")
         shift = ctypes.c_int()
-        shift.value = 0 - int(distance) # in oppsite direction
+        shift.value = 0 - int(distance)  # in oppsite direction
         result = self.lib.command_movr(self.device_id, shift, 0)
         log("Result: " + repr(result))
 
@@ -183,9 +191,8 @@ class Motor():
         if result == Result.Ok:
             log("Status.CurPosition: " + repr(status.CurPosition))
 
-    def get_name(self,devenum,dev_index):
-        return self.lib.get_device_name(devenum,dev_index)
-
+    def get_name(self, devenum, dev_index):
+        return self.lib.get_device_name(devenum, dev_index)
 
     def open_device(self, open_name):
         device_id = ctypes.c_int()
@@ -196,7 +203,8 @@ class Motor():
         return device_id
 
     def close_device(self):
-        result = self.lib.close_device(byref(cast(self.device_id, POINTER(c_int))))
+        result = self.lib.close_device(
+            byref(cast(self.device_id, POINTER(c_int))))
         if result == Result.Ok:
             print("Close device " + repr(self.device_id))
 
@@ -239,13 +247,13 @@ class MultiMotor():
         ze = z0+dz*(nz+1)
 
         print("position:" + str(self.get_status_position()))
-        for i in range(x0,xe,dx):
+        for i in range(x0, xe, dx):
             self.motor1.move(i)
             self.timesleep(time)
-            for j in range(y0,ye,dy):
+            for j in range(y0, ye, dy):
                 self.motor2.move(j)
                 self.timesleep(time)
-                for k in range(z0,ze,dz):
+                for k in range(z0, ze, dz):
                     self.motor3.move(k)
                     self.timesleep(time)
         print("position: " + str(self.get_status_position()))
@@ -257,13 +265,14 @@ class MultiMotor():
         x = self.motor1.get_status_position()
         y = self.motor2.get_status_position()
         z = self.motor3.get_status_position()
-        pos = [x,y,z]
+        pos = [x, y, z]
         return pos
 
     def close_multidevices(self):
         self.motor1.close_device()
         self.motor2.close_device()
         self.motor3.close_device()
+
 
 def test_singlemotor():
     # This is device search and enumeration with probing.
@@ -275,7 +284,7 @@ def test_singlemotor():
         open_name = "testdevice2"
         device_pytct = VitualDevice(open_name)
     else:
-        open_name=lib.get_device_name(devenum, 0)
+        open_name = lib.get_device_name(devenum, 0)
     #open_name = "xi-com:///dev/tty.usbmodem00000D81"
         device_pytct = Motor(open_name)
 
@@ -304,17 +313,18 @@ def test_singlemotor():
     device_pytct.close_device()
     print("Done")
 
+
 def test_multimotor():
     open_name1 = "testdevice1"
     open_name2 = "testdevice2"
     open_name3 = "testdevice3"
-    open_name = [open_name1,open_name2,open_name3]
+    open_name = [open_name1, open_name2, open_name3]
     multidevice = MultiMotor(open_name)
-    config = [[1, 10, 10],[2, 20, 15],[10, 1, 0]]
+    config = [[1, 10, 10], [2, 20, 15], [10, 1, 0]]
     time = 0.002
-    multidevice.move_multidevice(config,time)
+    multidevice.move_multidevice(config, time)
 
 
-#if __name__ == '__main__':
-    #test_singlemotor()
-    #test_multimotor()
+# if __name__ == '__main__':
+    # test_singlemotor()
+    # test_multimotor()

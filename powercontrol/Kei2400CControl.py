@@ -1,12 +1,21 @@
 import visa
 import time
 import warnings
+import serial
+import pty
+import os
 
 class keithley2400c:
     def __init__(self):
-        instlist=visa.ResourceManager()
-        print(instlist.list_resources())
-        self.kei2400c=instlist.open_resource("GPIB0::24::INSTR")
+
+        #instlist=visa.ResourceManager()
+        #print(instlist.list_resources())
+        ##self.kei2400c=instlist.open_resource("GPIB0::24::INSTR")
+        #self.kei2400c=instlist.open_resource("ASRL1::INSTR")
+        master, slave = pty.openpty()
+        s_name = os.ttyname(slave)
+        self.kei2400c = serial.Serial(s_name)
+
         self.timedelay=1
 
     def testIO(self):
